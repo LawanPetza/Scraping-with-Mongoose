@@ -26,8 +26,15 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Use express.static to serve the public folder as a static directory
 app.use(express.static("public"));
 
+
+// If deployed, use the deployed database. Otherwise use the local mongoHeadlines database
+var MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/mongoHeadlines";
+
+// Set mongoose to leverage built in JavaScript ES6 Promises
 // Connect to the Mongo DB
-mongoose.connect("mongodb://localhost/week18Populater");
+mongoose.Promise = Promise;
+mongoose.connect(MONGODB_URI);
+
 
 // A GET route for scraping the echoJS website
 app.get("/scrape", function(req, res) {
@@ -37,17 +44,13 @@ app.get("/scrape", function(req, res) {
       var $ = cheerio.load(response.data);
   
       // Now, we grab every h2 within an article tag, and do the following:
-      $("article h2").each(function(i, element) {
+      $("h2.content").each(function(i, element) {
         // Save an empty result object
         var result = {};
   
         // Add the text and href of every link, and save them as properties of the result object
-        result.title = $(this)
-          .children("a")
-          .text();
-        result.link = $(this)
-          .children("a")
-          .attr("href");
+        result.title = $(this).children("a").text();
+        result.link = $(this).children("a").attr("href");
   
         // Create a new Article using the `result` object built from scraping
         db.Article.create(result)
