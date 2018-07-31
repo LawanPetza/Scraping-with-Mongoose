@@ -12,9 +12,9 @@ var axios = require("axios");
 var cheerio = require("cheerio");
 
 // Require all models
-var db = require("./models");
-var Article = require("./models/Article");
-// var Note = require(".models/Note")
+// var db = require("./models");
+var Article = require("./models/Article.js");
+var Note = require("./models/Note.js")
 
 var PORT = 3000;
 
@@ -26,7 +26,7 @@ var app = express();
 // Use morgan logger for logging requests
 app.use(logger("dev"));
 // Use body-parser for handling form submissions
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({ extended: false }));
 // Use express.static to serve the public folder as a static directory
 app.use(express.static("public"));
 
@@ -41,9 +41,19 @@ mongoose.connect(MONGODB_URI);
 
 //Home route
 
-app.get('/home', function(request, response) {
-  res.send(index.html)
-});
+app.get("/"), function (req, res) {
+
+  Article.find({}), function (error, doc) {
+
+    if (error) {
+      console.log(error);
+    } else {
+
+      res.send(index.html);
+    }
+  };
+};
+
 
 
 // A GET route for scraping the guardian website
@@ -51,7 +61,7 @@ app.get("/scrape", function (req, res) {
   // First, we grab the body of the html with request
   axios.get("https://www.theguardian.com/us").then(function (response) {
 
-  
+
     // Load the HTML into cheerio and save it to a variable
     // '$' becomes a shorthand for cheerio's selector commands, much like jQuery's '$'
     var $ = cheerio.load(response.data);
@@ -65,84 +75,78 @@ app.get("/scrape", function (req, res) {
       result.title = $(this).text();
       result.link = $(this).attr("href");
       // result.summary = $(this).parent().text().trim();
-      
+
       console.log(result)
 
-      var scrapeArticle = new Article(result);
-      scrapeArticle.save(function(error, doc) {
+
+      var entry = new Article(result);
+
+      // Now, save that entry to the db
+      entry.save(function (error, doc) {
         if (error) {
           console.log("error: ", error);
         } else {
           console.log("New Article Scraped: ", doc);
         }
       });
-
-      // Create a new Article using the `result` object built from scraping
-      // db.Article.create(result)
-      //   .then(function (dbArticle) {
-      //     // View the added result in the console
-      //     console.log(dbArticle);
-      //   })
-      //   .catch(function (err) {
-      //     // If an error occurred, send it to the client
-      //     return res.json(err);
-      //   });
-    });
-
-    // If we were able to successfully scrape and save an Article, send a message to the client
-    // res.send("Scrape Complete");
-  })
-
+      // If we were able to successfully scrape and save an Article, send a message to the client
+      res.send("Scrape Complete");
+    })  
+  });
 });
 
 // Route for getting all Articles from the db
 app.get("/articles", function (req, res) {
   // Grab every document in the Articles collection
-  db.Article.find({})
-    .then(function (dbArticle) {
-      // If we were able to successfully find Articles, send them back to the client
-      res.json(dbArticle);
-    })
-    .catch(function (err) {
-      // If an error occurred, send it to the client
-      res.json(err);
-    });
+  Article.find({}), function(error, doc) {
+    // Log any errors
+    if (error) {
+      console.log(error);
+    }
+    // Or send the doc to the browser as a json object
+    else {
+      res.json(doc);
+    }
+  };
 });
 
 // Route for grabbing a specific Article by id, populate it with it's note
 app.get("/articles/:id", function (req, res) {
   // Using the id passed in the id parameter, prepare a query that finds the matching one in our db...
-  db.Article.findOne({ _id: req.params.id })
+  Article.findOne({ _id: req.params.id })
     // ..and populate all of the notes associated with it
     .populate("note")
-    .then(function (dbArticle) {
-      // If we were able to successfully find an Article with the given id, send it back to the client
-      res.json(dbArticle);
+    .exec(function(error, doc) {
+      if (error) {
+        console.log(error);
+      }
+      else {
+        res.json(doc);
+      }
     })
-    .catch(function (err) {
-      // If an error occurred, send it to the client
-      res.json(err);
-    });
-});
+  });
 
 // Route for saving/updating an Article's associated Note
 app.post("/articles/:id", function (req, res) {
   // Create a new note and pass the req.body to the entry
-  db.Note.create(req.body)
-    .then(function (dbNote) {
-      // If a Note was created successfully, find one Article with an `_id` equal to `req.params.id`. Update the Article to be associated with the new Note
-      // { new: true } tells the query that we want it to return the updated User -- it returns the original by default
-      // Since our mongoose query returns a promise, we can chain another `.then` which receives the result of the query
-      return db.Article.findOneAndUpdate({ _id: req.params.id }, { note: dbNote._id }, { new: true });
+  var newNote = new Note(req.body);
+
+    newNote.save(function(error, doc) {
+      if (error) {
+        console.log(error);
+      }
+      else {
+        Article.findOneAndUpdate({"_id": req.params.id}, {"note": doc._id})
+        .exec(function(err, doc) {
+          if (err) {
+            console.log(err);
+          }
+          else {
+            res.send(doc)
+          }
+        })
+      }
     })
-    .then(function (dbArticle) {
-      // If we were able to successfully update an Article, send it back to the client
-      res.json(dbArticle);
-    })
-    .catch(function (err) {
-      // If an error occurred, send it to the client
-      res.json(err);
-    });
 });
 
 // Delete One from the DB
