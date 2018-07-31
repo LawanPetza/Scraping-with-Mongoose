@@ -2,7 +2,7 @@ var express = require("express");
 var bodyParser = require("body-parser");
 var logger = require("morgan");
 var mongoose = require("mongoose");
-var request = require("request")
+// var request = require("request")
 var axios = require("axios");
 
 // Our scraping tools
@@ -13,6 +13,8 @@ var cheerio = require("cheerio");
 
 // Require all models
 var db = require("./models");
+var Article = require("./models/Article");
+// var Note = require(".models/Note")
 
 var PORT = 3000;
 
@@ -37,8 +39,14 @@ var MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/mongoHeadlines
 mongoose.Promise = Promise;
 mongoose.connect(MONGODB_URI);
 
+//Home route
 
-// A GET route for scraping the echoJS website
+app.get('/home', function(request, response) {
+  res.send(index.html)
+});
+
+
+// A GET route for scraping the guardian website
 app.get("/scrape", function (req, res) {
   // First, we grab the body of the html with request
   axios.get("https://www.theguardian.com/us").then(function (response) {
@@ -48,7 +56,7 @@ app.get("/scrape", function (req, res) {
     // '$' becomes a shorthand for cheerio's selector commands, much like jQuery's '$'
     var $ = cheerio.load(response.data);
 
-    // Now, we grab every h2 within an article tag, and do the following:
+    // Now, we grab every  within an article tag, and do the following:
     $(".fc-item__link").each(function (i, element) {
       // Save an empty result object
       var result = {};
@@ -56,29 +64,33 @@ app.get("/scrape", function (req, res) {
       // Add the text and href of every link, and save them as properties of the result object
       result.title = $(this).text();
       result.link = $(this).attr("href");
-
+      // result.summary = $(this).parent().text().trim();
       
       console.log(result)
 
-
-
-
-      // result.summary = $(element).children("a").text().trim();
+      var scrapeArticle = new Article(result);
+      scrapeArticle.save(function(error, doc) {
+        if (error) {
+          console.log("error: ", error);
+        } else {
+          console.log("New Article Scraped: ", doc);
+        }
+      });
 
       // Create a new Article using the `result` object built from scraping
-      db.Article.create(result)
-        .then(function (dbArticle) {
-          // View the added result in the console
-          console.log(dbArticle);
-        })
-        .catch(function (err) {
-          // If an error occurred, send it to the client
-          return res.json(err);
-        });
+      // db.Article.create(result)
+      //   .then(function (dbArticle) {
+      //     // View the added result in the console
+      //     console.log(dbArticle);
+      //   })
+      //   .catch(function (err) {
+      //     // If an error occurred, send it to the client
+      //     return res.json(err);
+      //   });
     });
 
     // If we were able to successfully scrape and save an Article, send a message to the client
-    res.send("Scrape Complete");
+    // res.send("Scrape Complete");
   })
 
 });
@@ -134,45 +146,45 @@ app.post("/articles/:id", function (req, res) {
 });
 
 // Delete One from the DB
-app.get("/delete/:id", function (req, res) {
-  // Remove a note using the objectID
-  db.Note.remove(
-    {
-      _id: mongojs.ObjectID(req.params.id)
-    },
-    function (error, removed) {
-      // Log any errors from mongojs
-      if (error) {
-        console.log(error);
-        res.send(error);
-      }
-      else {
-        // Otherwise, send the mongojs response to the browser
-        // This will fire off the success function of the ajax request
-        console.log(removed);
-        res.send(removed);
-      }
-    }
-  );
-});
+// app.get("/delete/:id", function (req, res) {
+//   // Remove a note using the objectID
+//   db.Note.remove(
+//     {
+//       _id: mongojs.ObjectID(req.params.id)
+//     },
+//     function (error, removed) {
+//       // Log any errors from mongojs
+//       if (error) {
+//         console.log(error);
+//         res.send(error);
+//       }
+//       else {
+//         // Otherwise, send the mongojs response to the browser
+//         // This will fire off the success function of the ajax request
+//         console.log(removed);
+//         res.send(removed);
+//       }
+//     }
+//   );
+// });
 
 // Clear the DB
-app.get("/clearall", function (req, res) {
-  // Remove every note from the notes collection
-  db.Note.remove({}, function (error, response) {
-    // Log any errors to the console
-    if (error) {
-      console.log(error);
-      res.send(error);
-    }
-    else {
-      // Otherwise, send the mongojs response to the browser
-      // This will fire off the success function of the ajax request
-      console.log(response);
-      res.send(response);
-    }
-  });
-});
+// app.get("/clearall", function (req, res) {
+//   // Remove every note from the notes collection
+//   db.Note.remove({}, function (error, response) {
+//     // Log any errors to the console
+//     if (error) {
+//       console.log(error);
+//       res.send(error);
+//     }
+//     else {
+//       // Otherwise, send the mongojs response to the browser
+//       // This will fire off the success function of the ajax request
+//       console.log(response);
+//       res.send(response);
+//     }
+//   });
+// });
 
 // Start the server
 app.listen(PORT, function () {
