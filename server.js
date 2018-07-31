@@ -3,18 +3,18 @@ var bodyParser = require("body-parser");
 var logger = require("morgan");
 var mongoose = require("mongoose");
 // var request = require("request")
-var axios = require("axios");
+var path = require("path")
 
 // Our scraping tools
 // Axios is a promised-based http library, similar to jQuery's Ajax method
 // It works on the client and on the server
-// var axios = require("axios");
+var axios = require("axios");
 var cheerio = require("cheerio");
 
 // Require all models
-// var db = require("./models");
-var Article = require("./models/Article.js");
-var Note = require("./models/Note.js")
+var db = require("./models");
+// var Article = require("./models/Article.js");
+// var Note = require("./models/Note.js")
 
 var PORT = 3000;
 
@@ -30,7 +30,6 @@ app.use(bodyParser.urlencoded({ extended: false }));
 // Use express.static to serve the public folder as a static directory
 app.use(express.static("public"));
 
-
 // If deployed, use the deployed database. Otherwise use the local mongoHeadlines database
 var MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/mongoHeadlines";
 
@@ -40,31 +39,45 @@ var MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/mongoHeadlines
 mongoose.Promise = Promise;
 mongoose.connect(MONGODB_URI);
 
-var db = mongoose.connection;
+// Database configuration with mongoose
+// mongoose.connect("mongodb://heroku_t9z68g3k");
+
+
+// var DB = mongoose.connection;
 // Show any mongoose errors
-db.on("error", function(error) {
-  console.log("Mongoose Error: ", error);
-});
+// DB.on("error", function (error) {
+//   console.log("Mongoose Error: ", error);
+// });
 // Once logged in to the db through mongoose, log a success message
-db.once("open", function() {
-  console.log("Mongoose connection successful.");
-});
+// DB.once("open", function () {
+//   console.log("Mongoose connection successful.");
+// });
 
 //Home route
 
-app.get("/"), function (req, res) {
+// app.get("/", function (req, res) {
+//   db.Article.find({
+//       saved: false
+//     })
+//     .then(function (dbArticle) {
+//       let hbsObject = {
+//         articles: dbArticle
+//       };
+//       res.render("allarticles", hbsObject);
+//     })
+//     .catch(function (err) {
+//       res.json(err);
+//     });
+// });
 
-  Article.find({}), function (error, doc) {
+// Simple index route
+app.get("/", function(req, res) {
+  res.send(index.html);
+});
 
-    if (error) {
-      console.log(error);
-    } else {
-
-      res.send(index.html);
-    }
-  };
-};
-
+app.get("/allArticles", function(req, res) {
+  res.sendFile(path.join(__dirname + "/public/saved.html"));
+});
 
 
 // A GET route for scraping the guardian website
@@ -90,116 +103,128 @@ app.get("/scrape", function (req, res) {
       console.log(result)
 
 
-      var entry = new Article(result);
+      // Create a new Article using the `result` object built from scraping
+      db.Article.create(result)
+        .then(function (dbArticle) {
+          // View the added result in the console
+          console.log(dbArticle);
+        })
+        .catch(function (err) {
+          // If an error occurred, send it to the client
+          return res.json(err);
+        });
+    });
 
-      // Now, save that entry to the db
-      entry.save(function (error, doc) {
-        if (error) {
-          console.log("error: ", error);
-        } else {
-          console.log("New Article Scraped: ", doc);
-        }
-      });
-      // If we were able to successfully scrape and save an Article, send a message to the client
-      res.send("Scrape Complete");
-    })  
+    // If we were able to successfully scrape and save an Article, send a message to the client
+    res.send("Scrape Complete");
   });
 });
 
 // Route for getting all Articles from the db
 app.get("/articles", function (req, res) {
   // Grab every document in the Articles collection
-  Article.find({}), function(error, doc) {
-    // Log any errors
-    if (error) {
-      console.log(error);
-    }
-    // Or send the doc to the browser as a json object
-    else {
-      res.json(doc);
-    }
-  };
+  db.Article.find({})
+    .then(function (dbArticle) {
+
+      console.log(dbArticle)
+      // If we were able to successfully find Articles, send them back to the client
+      res.json(dbArticle);
+    })
+    .catch(function (err) {
+      // If an error occurred, send it to the client
+      res.json(err);
+    });
 });
 
 // Route for grabbing a specific Article by id, populate it with it's note
 app.get("/articles/:id", function (req, res) {
   // Using the id passed in the id parameter, prepare a query that finds the matching one in our db...
-  Article.findOne({ _id: req.params.id })
+  db.Article.findOne({ _id: req.params.id })
     // ..and populate all of the notes associated with it
     .populate("note")
-    .exec(function(error, doc) {
-      if (error) {
-        console.log(error);
-      }
-      else {
-        res.json(doc);
-      }
+    .then(function (dbArticle) {
+      // If we were able to successfully find an Article with the given id, send it back to the client
+      res.json(dbArticle);
     })
-  });
+    .catch(function (err) {
+      // If an error occurred, send it to the client
+      res.json(err);
+    });
+});
 
 // Route for saving/updating an Article's associated Note
 app.post("/articles/:id", function (req, res) {
   // Create a new note and pass the req.body to the entry
-  var newNote = new Note(req.body);
+  db.Note.create(req.body)
+    .then(function (dbNote) {
+      // If a Note was created successfully, find one Article with an `_id` equal to `req.params.id`. Update the Article to be associated with the new Note
+      // { new: true } tells the query that we want it to return the updated User -- it returns the original by default
+      // Since our mongoose query returns a promise, we can chain another `.then` which receives the result of the query
+      return db.Article.findOneAndUpdate({ _id: req.params.id }, { note: dbNote._id }, { new: true });
+    })
+    .then(function (dbArticle) {
+      // If we were able to successfully update an Article, send it back to the client
+      res.json(dbArticle);
+    })
+    .catch(function (err) {
+      // If an error occurred, send it to the client
+      res.json(err);
+    });
+});
 
-    newNote.save(function(error, doc) {
-      if (error) {
-        console.log(error);
-      }
-      else {
-        Article.findOneAndUpdate({"_id": req.params.id}, {"note": doc._id})
-        .exec(function(err, doc) {
-          if (err) {
-            console.log(err);
-          }
-          else {
-            res.send(doc)
-          }
-        })
-      }
+ // POST to save an article
+ app.post("/savearticle/:id", function (req, res) {
+  db.Article.findByIdAndUpdate({
+      _id: req.params.id
+    }, {
+      saved: true
+    })
+    .then(function (dbArticle) {
+      res.json(dbArticle);
+    })
+    .catch(function (err) {
+      res.json(err);
     })
 });
 
-// Delete One from the DB
-// app.get("/delete/:id", function (req, res) {
-//   // Remove a note using the objectID
-//   db.Note.remove(
-//     {
-//       _id: mongojs.ObjectID(req.params.id)
-//     },
-//     function (error, removed) {
-//       // Log any errors from mongojs
-//       if (error) {
-//         console.log(error);
-//         res.send(error);
-//       }
-//       else {
-//         // Otherwise, send the mongojs response to the browser
-//         // This will fire off the success function of the ajax request
-//         console.log(removed);
-//         res.send(removed);
-//       }
-//     }
-//   );
-// });
+// POST to delete a saved article
+app.post("/deletearticle/:id", function (req, res) {
+  db.Article.findByIdAndUpdate({
+      _id: req.params.id
+    }, {
+      saved: false
+    })
+    .then(function (dbArticle) {
+      res.json(dbArticle);
+    })
+    .catch(function (err) {
+      res.json(err);
+    })
+});
 
-// Clear the DB
-// app.get("/clearall", function (req, res) {
-//   // Remove every note from the notes collection
-//   db.Note.remove({}, function (error, response) {
-//     // Log any errors to the console
-//     if (error) {
-//       console.log(error);
-//       res.send(error);
-//     }
-//     else {
-//       // Otherwise, send the mongojs response to the browser
-//       // This will fire off the success function of the ajax request
-//       console.log(response);
-//       res.send(response);
-//     }
-//   });
-// });
+ // POST to delete a note
+ app.post("/deletenote/:id", function (req, res) {
+  db.Note.remove({
+      _id: req.params.id
+    })
+    .then(function (dbNote) {
+      res.json(dbNote);
+    })
+    .catch(function (err) {
+      res.json(err);
+    })
+});
+
+ // GET to clear the database (used for testing purposes)
+ app.get("/cleardb", function (req, res) {
+  db.Article.remove({})
+    .then(function () {
+      res.send("Cleared!");
+    })
+    .catch(function (err) {
+      res.json(err);
+    })
+});
 
 // Start the server
 app.listen(PORT, function () {
