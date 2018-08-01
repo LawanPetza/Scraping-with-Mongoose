@@ -56,7 +56,6 @@
             font-size: 18px;
         }
     </style>
-
 </head>
 
 <body>
@@ -64,33 +63,35 @@
         <h1>News Scraper</h1>
         <div id="articlesDiv"></div>
         <div id="notes"></div>
-
     </div>
-
 
 
 
     <!-- <input type="submit"> -->
     <!-- <a href="/notes"><button class="scrape"> Saved Articles</button></a> -->
+    <div class="container">
+        <a href="/">
+            <button class="home" id="homeBtn"> Home</button>
+        </a>
+        <a href="/">
+            <button class="saved" id="savedBtn"> Saved Articles</button>
+        </a>
 
-<div class="container">
-    <a href="/">
-        <button class="home" id="homeBtn"> Home</button>
-    </a>
-    <a href="/">
-        <button class="saved" id="savedBtn"> Saved Articles</button>
-    </a>
+
+        <a href="/scrape">
+            <button class="scrape" id="scrapeBtn">SCRAPE NEW ARTICLES</button>
+        </a>
+        <button id="clearBtn">CLEAR ARTICLES</button>
+    </div>
 
 
-    <a href="/scrape">
-        <button class="scrape" id="scrapeBtn">SCRAPE NEW ARTICLES</button>
-    </a>
-    <button id="clearBtn">CLEAR ARTICLES</button>
-</div>
+
+
+    </div>
 
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-    <script src="app.js"></script>
+    <script src="allarticles.js"></script>
 </body>
 
 </html>

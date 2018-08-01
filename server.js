@@ -75,8 +75,8 @@ app.get("/", function(req, res) {
   res.send(index.html);
 });
 
-app.get("/allArticles", function(req, res) {
-  res.sendFile(path.join(__dirname + "/public/saved.html"));
+app.get("/allarticles", function(req, res) {
+  res.sendFile(path.join(__dirname + "/public/allarticles.html"));
 });
 
 
@@ -103,20 +103,20 @@ app.get("/scrape", function (req, res) {
       console.log(result)
 
 
-      // Create a new Article using the `result` object built from scraping
-      db.Article.create(result)
-        .then(function (dbArticle) {
-          // View the added result in the console
-          console.log(dbArticle);
-        })
-        .catch(function (err) {
-          // If an error occurred, send it to the client
-          return res.json(err);
-        });
+      // // Create a new Article using the `result` object built from scraping
+      // db.Article.create(result)
+      //   .then(function (dbArticle) {
+      //     // View the added result in the console
+      //     console.log(dbArticle);
+      //   })
+      //   .catch(function (err) {
+      //     // If an error occurred, send it to the client
+      //     return res.json(err);
+      //   });
     });
 
     // If we were able to successfully scrape and save an Article, send a message to the client
-    res.send("Scrape Complete");
+    // res.send("Scrape Complete");
   });
 });
 
@@ -126,7 +126,7 @@ app.get("/articles", function (req, res) {
   db.Article.find({})
     .then(function (dbArticle) {
 
-      console.log(dbArticle)
+      // console.log(dbArticle)
       // If we were able to successfully find Articles, send them back to the client
       res.json(dbArticle);
     })
