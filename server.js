@@ -13,8 +13,7 @@ var cheerio = require("cheerio");
 
 // Require all models
 var db = require("./models");
-// var Article = require("./models/Article.js");
-// var Note = require("./models/Note.js")
+
 
 var PORT = 3000;
 
@@ -88,20 +87,22 @@ app.get("/scrape", function (req, res) {
 
 
       // // Create a new Article using the `result` object built from scraping
-      // db.Article.create(result)
-      //   .then(function (dbArticle) {
-      //     // View the added result in the console
-      //     console.log(dbArticle);
-      //   })
-      //   .catch(function (err) {
-      //     // If an error occurred, send it to the client
-      //     return res.json(err);
-      //   });
+      db.Article.create(result)
+        .then(function (dbArticle) {
+          // View the added result in the console
+          console.log(dbArticle);
+        })
+        .catch(function (err) {
+          // If an error occurred, send it to the client
+          return res.json(err);
+        });
     });
 
-    // If we were able to successfully scrape and save an Article, send a message to the client
-    // res.send("Scrape Complete");
   });
+  // If we were able to successfully scrape and save an Article, send a message to the client
+  // res.redirect("/")
+  res.send("Scrape Complete");
+  
 });
 
 // Route for getting all Articles from the db
@@ -200,15 +201,15 @@ app.post("/deletearticle/:id", function (req, res) {
 });
 
  // GET to clear the database (used for testing purposes)
- app.get("/cleardb", function (req, res) {
-  db.Article.remove({})
-    .then(function () {
-      res.send("Cleared!");
-    })
-    .catch(function (err) {
-      res.json(err);
-    })
-});
+//  app.get("/cleardb", function (req, res) {
+//   db.Article.remove({})
+//     .then(function () {
+//       res.send("Cleared!");
+//     })
+//     .catch(function (err) {
+//       res.json(err);
+//     })
+// });
 
 // Start the server
 app.listen(PORT, function () {

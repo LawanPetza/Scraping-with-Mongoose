@@ -15,19 +15,19 @@
 
     <style>
         body {
-            background-color: antiquewhite;
+            background-color: rgb(226, 206, 179);
             font-family: 'Old Standard TT', serif;
-            color: blue
+            color: rgb(18, 18, 117)
         }
 
         #wrapper {
-            width: 960px;
+            width: 85%;
             margin-left: auto;
             margin-right: auto;
-            padding-top: 5%;
+            padding-top: 10px;
         }
 
-        #articles {
+        #articlesDiv {
             display: inline-block;
             overflow: auto;
             width: 60%;
@@ -43,7 +43,7 @@
         input {
             display: block;
             width: 100%;
-            background-color: #FCF5C7;
+            background-color: rgb(199, 252, 249);
         }
 
         input {
@@ -55,25 +55,44 @@
             height: 200px;
             font-size: 18px;
         }
+
+        p,
+        li {
+            font-size: 15px;
+        }
+        .jumbotron {
+            background-color: rgb(243, 139, 139);
+        }
     </style>
 
 </head>
 
 <body>
+
     <div id="wrapper">
-        <h1>News Scraper</h1>
+        <div class="container-fluid">
+            <div class="jumbotron text-center">
+                <h2>Welcome to Mongo Scraper!</h2>
+                <p>
+                    <i>Let's scrape some News!</i>
+                </p>
+                <p>
+                    <a class="btn btn-primary " href="/scrape" role="button" id="scrapeButton">Scrape me!</a>
+                </p>
+            </div>
+        </div>
         <div id="articlesDiv"></div>
         <div id="notes"></div>
+        <!-- <a href="/scrape">
+            <button class="btn btn-primary" id = "scrapeButton">Scrape me!</button>
+        </a> -->
+
 
     </div>
 
 
 
-
-    <!-- <input type="submit"> -->
-    <!-- <a href="/notes"><button class="scrape"> Saved Articles</button></a> -->
-
-<div class="container">
+    <!-- <div class="container">
     <a href="/">
         <button class="home" id="homeBtn"> Home</button>
     </a>
@@ -86,7 +105,7 @@
         <button class="scrape" id="scrapeBtn">SCRAPE NEW ARTICLES</button>
     </a>
     <button id="clearBtn">CLEAR ARTICLES</button>
-</div>
+</div> -->
 
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>

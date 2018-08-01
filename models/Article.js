@@ -17,17 +17,17 @@ var ArticleSchema = new Schema({
     required: true
   },
 
-  summary: {
-    type: String,
+  // summary: {
+  //   type: String,
     // required: true
 
-  },
+  // },
 
-  saved: {
-    type: Boolean,
-    default: false
+  // saved: {
+  //   type: Boolean,
+  //   default: false
 
-  },
+  // },
 
   dataCreated: {
   type: Date,

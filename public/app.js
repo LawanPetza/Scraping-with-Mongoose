@@ -1,19 +1,24 @@
-$(document).ready(function () {
-  $(document).on("click", "#scrapeBtn", function () {
+//  function getArticles() {
+//     $("#articlesDiv").empty();
+  
+
+  // $(document).on("click", "#scrapeBtn", function () {
     $.get("/articles", function (data) {
 
-      console.log("AJAX")
+      // console.log("AJAX")
       // For each one
-      for (var i = 0; i <= 15; i++) {
+      for (var i = 0; i < data.length; i++) {
         // Display the apropos information on the page
-        $("#articlesDiv").append("<p data-id='" + data[i]._id + "'>" + data[i].title + "<br /><a>" + data[i].link + "</a></p>");
+        $("#articlesDiv").append("<li data-id='" + data[i]._id + "'>" + "<strong>"+ data[i].title + "</strong>" + "<br /><a>" + data[i].link + "</a></li><hr>");
       }
     })
-
-  });
+// });
+  
+// }
+// getArticles();
 
   // Whenever someone clicks a p tag
-  $(document).on("click", "p", function () {
+  $(document).on("click", "li", function () {
 
     // Empty the notes from the note section
     $("#notes").empty();
@@ -29,7 +34,7 @@ $(document).ready(function () {
       .then(function (data) {
         console.log(data);
         // The title of the article
-        $("#notes").append("<h2>" + data.title + "</h2>");
+        $("#notes").append("<p><strong>" + data.title + "</strong></p>");
         // An input to enter a new title
         $("#notes").append("<input id='titleinput' name='title' >");
         // A textarea to add a new note body
@@ -76,4 +81,3 @@ $(document).ready(function () {
     $("#titleinput").val("");
     $("#bodyinput").val("");
   });
-});
