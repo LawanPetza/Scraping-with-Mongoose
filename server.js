@@ -43,7 +43,7 @@ mongoose.connect(MONGODB_URI);
 
 // Simple index route
 app.get("/", function(req, res) {
-  res.send(index.html);
+  res.sendFile(path.join(__dirname + "/public/index.html"));
 });
 
 // app.get("/allarticles", function(req, res) {
