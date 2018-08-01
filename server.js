@@ -71,14 +71,14 @@ app.get("/scrape", function (req, res) {
       result.link = $(this).attr("href");
       // result.summary = $(this).parent().text().trim();
 
-      console.log(result)
+   
 
 
       // // Create a new Article using the `result` object built from scraping
       db.Article.create(result)
         .then(function (dbArticle) {
           // View the added result in the console
-          console.log(dbArticle);
+          
         })
         .catch(function (err) {
           // If an error occurred, send it to the client
@@ -86,12 +86,12 @@ app.get("/scrape", function (req, res) {
         });
     });
 
+    // If we were able to successfully scrape and save an Article, send a message to the client
+   
+    res.redirect("/")
   });
-  // If we were able to successfully scrape and save an Article, send a message to the client
-  res.send("Scrape Complete");
-  res.redirect("/")
   
-  
+   
 });
 
 // Route for getting all Articles from the db
