@@ -13,6 +13,12 @@
       }
     })
 });
+
+// function scrape(){
+//   $.get("/scrape", function(data){
+//     console.log(data);
+//   }
+// }
   
 // }
 // getArticles();
