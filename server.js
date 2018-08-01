@@ -38,19 +38,7 @@ var MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/mongoHeadlines
 mongoose.Promise = Promise;
 mongoose.connect(MONGODB_URI);
 
-// Database configuration with mongoose
-// mongoose.connect("mongodb://heroku_t9z68g3k");
 
-
-// var DB = mongoose.connection;
-// Show any mongoose errors
-// DB.on("error", function (error) {
-//   console.log("Mongoose Error: ", error);
-// });
-// Once logged in to the db through mongoose, log a success message
-// DB.once("open", function () {
-//   console.log("Mongoose connection successful.");
-// });
 
 
 // Simple index route
@@ -58,9 +46,9 @@ app.get("/", function(req, res) {
   res.send(index.html);
 });
 
-app.get("/allarticles", function(req, res) {
-  res.sendFile(path.join(__dirname + "/public/allarticles.html"));
-});
+// app.get("/allarticles", function(req, res) {
+//   res.sendFile(path.join(__dirname + "/public/allarticles.html"));
+// });
 
 
 // A GET route for scraping the guardian website
@@ -100,8 +88,8 @@ app.get("/scrape", function (req, res) {
 
   });
   // If we were able to successfully scrape and save an Article, send a message to the client
-  // res.redirect("/")
-  res.send("Scrape Complete");
+  res.redirect("/")
+  
   
 });
 

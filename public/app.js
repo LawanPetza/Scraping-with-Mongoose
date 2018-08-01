@@ -2,7 +2,7 @@
 //     $("#articlesDiv").empty();
   
 
-  // $(document).on("click", "#scrapeBtn", function () {
+  $(document).ready(function() {
     $.get("/articles", function (data) {
 
       // console.log("AJAX")
@@ -12,7 +12,7 @@
         $("#articlesDiv").append("<li data-id='" + data[i]._id + "'>" + "<strong>"+ data[i].title + "</strong>" + "<br /><a>" + data[i].link + "</a></li><hr>");
       }
     })
-// });
+});
   
 // }
 // getArticles();
