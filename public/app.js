@@ -54,7 +54,7 @@
   });
 
   // When you click the savenote button
-  $(document).on("click", "#savedBtn", function () {
+  $(document).on("click", "#savenote", function () {
     // Grab the id associated with the article from the submit button
     var thisId = $(this).attr("data-id");
 

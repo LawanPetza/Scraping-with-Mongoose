@@ -200,16 +200,6 @@ app.post("/deletearticle/:id", function (req, res) {
     })
 });
 
- // GET to clear the database (used for testing purposes)
-//  app.get("/cleardb", function (req, res) {
-//   db.Article.remove({})
-//     .then(function () {
-//       res.send("Cleared!");
-//     })
-//     .catch(function (err) {
-//       res.json(err);
-//     })
-// });
 
 // Start the server
 app.listen(PORT, function () {
