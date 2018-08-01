@@ -53,22 +53,6 @@ mongoose.connect(MONGODB_URI);
 //   console.log("Mongoose connection successful.");
 // });
 
-//Home route
-
-// app.get("/", function (req, res) {
-//   db.Article.find({
-//       saved: false
-//     })
-//     .then(function (dbArticle) {
-//       let hbsObject = {
-//         articles: dbArticle
-//       };
-//       res.render("allarticles", hbsObject);
-//     })
-//     .catch(function (err) {
-//       res.json(err);
-//     });
-// });
 
 // Simple index route
 app.get("/", function(req, res) {
